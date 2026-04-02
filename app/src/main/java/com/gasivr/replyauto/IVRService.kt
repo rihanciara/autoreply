@@ -71,22 +71,31 @@ class IVRService : Service() {
 
             mediaPlayer = MediaPlayer.create(this, R.raw.fliki_sample)
             
-            // Set audio attributes to prioritize voice communication
+            // Critical Fix for caller not hearing the audio:
+            // We must set the audio stream type to STREAM_VOICE_CALL so it routes through the phone line instead of the music speaker
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 mediaPlayer?.setAudioAttributes(
                     android.media.AudioAttributes.Builder()
                         .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
-                        .setUsage(android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                        .setUsage(android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION) // Important: Forces it onto the call line
                         .build()
                 )
+            } else {
+                @Suppress("DEPRECATION")
+                mediaPlayer?.setAudioStreamType(AudioManager.STREAM_VOICE_CALL)
             }
 
             mediaPlayer?.setOnCompletionListener {
                 Log.d("IVRService", "Audio message finished playing.")
                 listenForResponse()
             }
-            mediaPlayer?.start()
-            Log.d("IVRService", "Playing Malayalam Audio Message on Stream: ${AudioManager.STREAM_VOICE_CALL}")
+            
+            // Wait 1 extra second before starting audio to let the call connect completely
+            handler.postDelayed({
+                mediaPlayer?.start()
+                Log.d("IVRService", "Started Playing Malayalam Audio Message.")
+            }, 1000)
+            
         } catch (e: Exception) {
             Log.e("IVRService", "Error playing media", e)
         }
