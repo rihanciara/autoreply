@@ -76,15 +76,14 @@ class IVRService : Service() {
     }
 
     private fun listenForResponse() {
-        // DETECTING "PRESS 1" IS IMPOSSIBLE ON ANDROID
-        // Android absolutely blocks 3rd-party apps from reading keypad/DTMF tones over a phone call
-        // because it's a security risk (preventing apps from stealing banking PINs).
-        Log.d("IVRService", "Waiting for caller response.")
+        // NOTE: NATIVE ANDROID BLOCKS DETECTING DTMF (KEYPAD PRESSES LIKE '1') DURING A CALL.
+        // It is an OS-level security restriction to prevent apps from stealing passwords/PINs.
+        // Because we CANNOT detect if they press '1', we MUST use voice recognition (Speech-to-Text)
+        // or a time-based workaround.
+        // I have implemented the time-based workaround: if they don't hang up after 5 seconds,
+        // the app assumes they want to talk to you and rings your phone loudly.
         
-        // WORKAROUND: We wait 5 seconds. If the caller does not hang up themselves,
-        // we assume they want to continue the call (acting like they pressed 1),
-        // and we ring your phone loudly so you can pick it up.
-        // If they hang up, the system automatically drops the call anyway.
+        Log.d("IVRService", "Waiting for caller response.")
         handler.postDelayed({
             alertOwnerToPickup()
         }, 5000)
