@@ -15,16 +15,17 @@ class CallReceiver : BroadcastReceiver() {
             val stateStr = intent.extras?.getString(TelephonyManager.EXTRA_STATE)
             val incomingNumber = intent.extras?.getString(TelephonyManager.EXTRA_INCOMING_NUMBER)
 
-            if (stateStr == TelephonyManager.EXTRA_STATE_RINGING && incomingNumber != null) {
+            // TRIGGER ONLY WHEN THE CALL IS ANSWERED (OFFHOOK), NOT WHEN RINGING
+            if (stateStr == TelephonyManager.EXTRA_STATE_OFFHOOK && incomingNumber != null) {
                 if (!isContactSaved(context, incomingNumber)) {
-                    Log.d("CallReceiver", "Unknown number calling: $incomingNumber. Starting IVR.")
-                    // Start service to handle answering and audio
+                    Log.d("CallReceiver", "Unknown number answered by user: $incomingNumber. Starting IVR Audio.")
+                    // Start service to play audio
                     val serviceIntent = Intent(context, IVRService::class.java).apply {
                         putExtra("INCOMING_NUMBER", incomingNumber)
                     }
                     context.startForegroundService(serviceIntent)
                 } else {
-                    Log.d("CallReceiver", "Saved contact $incomingNumber calling. Ignoring.")
+                    Log.d("CallReceiver", "Saved contact answered. Ignoring.")
                 }
             }
         }

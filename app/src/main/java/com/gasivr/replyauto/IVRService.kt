@@ -29,31 +29,18 @@ class IVRService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val number = intent?.getStringExtra("INCOMING_NUMBER") ?: "Unknown"
-        startForeground(1, createNotification("Screening call from $number..."))
+        startForeground(1, createNotification("Playing audio to $number..."))
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        // Step 1: Answer Call
-        answerCall()
-
-        // Step 2: Delay for connection setup, then inject audio directly
+        // WE DO NOT ANSWER THE CALL - THE USER ALREADY ANSWERED IT
+        
+        // Wait just 1 second after user answers before injecting audio
         handler.postDelayed({
             injectAudioToCall()
-        }, 1500)
+        }, 1000)
 
         return START_NOT_STICKY
-    }
-
-    private fun answerCall() {
-        try {
-            val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ANSWER_PHONE_CALLS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                telecomManager.acceptRingingCall()
-                Log.d("IVRService", "Call answered successfully.")
-            }
-        } catch (e: Exception) {
-            Log.e("IVRService", "Failed to answer call", e)
-        }
     }
 
     private fun injectAudioToCall() {
