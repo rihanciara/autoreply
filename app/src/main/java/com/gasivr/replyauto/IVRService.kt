@@ -80,13 +80,13 @@ class IVRService : Service() {
         // It is an OS-level security restriction to prevent apps from stealing passwords/PINs.
         // Because we CANNOT detect if they press '1', we MUST use voice recognition (Speech-to-Text)
         // or a time-based workaround.
-        // I have implemented the time-based workaround: if they don't hang up after 30 seconds,
+        // I have implemented the time-based workaround: if they don't hang up after 15 seconds,
         // the app assumes they want to talk to you and rings your phone loudly.
         
-        Log.d("IVRService", "Waiting for caller response (30 seconds).")
+        Log.d("IVRService", "Waiting for caller response (15 seconds).")
         handler.postDelayed({
             alertOwnerToPickup()
-        }, 30000)
+        }, 15000)
     }
 
     private fun dropCall() {
