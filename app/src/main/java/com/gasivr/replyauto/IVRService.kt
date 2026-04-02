@@ -52,24 +52,41 @@ class IVRService : Service() {
     }
 
     private fun enableSpeakerAndPlayAudio() {
-        // Force speakerphone on so mic can pick it up (Android IVR hack limitation)
-        audioManager.mode = AudioManager.MODE_IN_CALL
+        // FORCE SPEAKERPHONE ON
+        // In Android 12+, we need to request audio focus differently and ensure the mode is IN_COMMUNICATION
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
         audioManager.isSpeakerphoneOn = true
 
+        // Double check speakerphone actually turned on
+        Log.d("IVRService", "Speakerphone enabled: ${audioManager.isSpeakerphoneOn}")
+
         try {
-            // Ensure you place your Fliki_sample.mp3 inside app/src/main/res/raw/
-            mediaPlayer = MediaPlayer.create(this, R.raw.fliki_sample)
-            
-            // Set volume to max so caller hears it via the microphone
+            // Set volume to absolute maximum so caller hears it via the microphone
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
             audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, maxVolume, 0)
+            
+            // Also max out media volume just in case it routes there
+            val maxMediaVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxMediaVolume, 0)
+
+            mediaPlayer = MediaPlayer.create(this, R.raw.fliki_sample)
+            
+            // Set audio attributes to prioritize voice communication
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mediaPlayer?.setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .setUsage(android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                        .build()
+                )
+            }
 
             mediaPlayer?.setOnCompletionListener {
                 Log.d("IVRService", "Audio message finished playing.")
                 listenForResponse()
             }
             mediaPlayer?.start()
-            Log.d("IVRService", "Playing Malayalam Audio Message.")
+            Log.d("IVRService", "Playing Malayalam Audio Message on Stream: ${AudioManager.STREAM_VOICE_CALL}")
         } catch (e: Exception) {
             Log.e("IVRService", "Error playing media", e)
         }
