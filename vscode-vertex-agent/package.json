@@ -1,0 +1,76 @@
+{
+  "name": "opencode-vertex-agent",
+  "displayName": "OpenCode Vertex Agent",
+  "description": "An agentic coding assistant powered by Google Cloud Vertex AI Search. Designed to consume GenAI App Builder credits.",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "opencode-vertex.askAgent",
+        "title": "Ask Vertex AI Agent"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vertex-agent-view",
+          "title": "OpenCode Vertex Agent",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vertex-agent-view": [
+        {
+          "type": "webview",
+          "id": "vertex-agent-chat",
+          "name": "Chat"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Vertex AI Agent Settings",
+      "properties": {
+        "opencodeVertex.projectId": {
+          "type": "string",
+          "default": "",
+          "description": "Your Google Cloud Project ID"
+        },
+        "opencodeVertex.dataStoreId": {
+          "type": "string",
+          "default": "",
+          "description": "Your Vertex AI Search Data Store ID"
+        },
+        "opencodeVertex.location": {
+          "type": "string",
+          "default": "global",
+          "description": "Location of your Data Store (e.g., global, us-central1)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "@google-cloud/vertexai": "^1.1.0",
+    "google-auth-library": "^9.10.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "typescript": "^5.3.3",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

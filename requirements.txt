@@ -1,4 +1,0 @@
-google-cloud-aiplatform
-langchain-google-vertexai
-langchain
-python-dotenv
